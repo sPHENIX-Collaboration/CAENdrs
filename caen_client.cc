@@ -65,7 +65,7 @@ void exithelp( const int ret =1)
   exit(ret);
 }
 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 
   if ( argc==1) 
@@ -84,7 +84,7 @@ main(int argc, char *argv[])
 	  // the -d  (which linknum) switch 
 	case 'd':
 	  if ( !sscanf(optarg, "%d",  &linknum) ) exithelp();
-	  if ( linknum < 0 || linknum > 3) exithelp();
+	  if ( linknum < 0 || linknum > 15) exithelp();
 	  break;
 
 	case 'v':

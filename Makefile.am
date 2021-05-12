@@ -19,10 +19,13 @@ librcdaqplugin_CAENdrs_la_SOURCES = \
 
 
 librcdaqplugin_CAENdrs_la_LIBADD = -lpthread -lCAENDigitizer $(RPC_LDD)
-bin_PROGRAMS =  caen_client
-caen_client_SOURCES = caen_client.cc parseargument.cc caen_manager.cc
+bin_PROGRAMS =  caen_client caen_pulse
 
+caen_client_SOURCES = caen_client.cc parseargument.cc caen_manager.cc
 caen_client_LDADD = -lpthread -lCAENDigitizer
+
+caen_pulse_SOURCES = caen_pulse.cc parseargument.cc caen_manager.cc
+caen_pulse_LDADD = -lpthread -lCAENDigitizer
 
 
 clean-local:

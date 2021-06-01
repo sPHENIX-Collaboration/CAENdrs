@@ -19,6 +19,8 @@ librcdaqplugin_CAENdrs_la_SOURCES = \
 	CAENdrs_plugin.cc
 
 
+bin_SCRIPTS =  caen_capture_calibration.sh
+
 librcdaqplugin_CAENdrs_la_LIBADD = -lpthread -lCAENDigitizer $(RPC_LDD)
 bin_PROGRAMS =  caen_client caen_pulse
 

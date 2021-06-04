@@ -32,7 +32,7 @@ daq_device_CAENPulse::daq_device_CAENPulse(const int eventtype
 
   cout << __FILE__ << " " <<  __LINE__ << " Pulse on " << m_eventType << " " << _linknumber << endl;
   
-  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_PCI_OpticalLink, _linknumber , node, 0 ,&handle);
+  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , node, 0 ,&handle);
 
 
   if ( _broken )

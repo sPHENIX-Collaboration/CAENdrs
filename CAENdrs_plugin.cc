@@ -64,6 +64,20 @@ int CAENdrs_plugin::create_device(deviceblock *db)
 	  return 0;  // say "we handled this request" 
 	}
 
+      else if ( db->npar == 6)
+	{
+	  int linknumber = get_value ( db->argv3);
+	  int trigger = get_value ( db->argv4);
+	  int endpulse = get_value ( db->argv5);
+
+	  add_readoutdevice ( new daq_device_CAENdrs( eventtype,
+						      subid,
+						      linknumber, 
+						      trigger,
+						      endpulse));
+	  return 0;  // say "we handled this request" 
+	}
+
     }
   
   else if ( strcasecmp(db->argv0,"device_CAENdrs_std") == 0 ) 
@@ -133,6 +147,24 @@ int CAENdrs_plugin::create_device(deviceblock *db)
 	  return 0;  // say "we handled this request" 
 	}
 
+      else if ( db->npar == 8)
+	{
+	  int linknumber = get_value ( db->argv3);
+	  int trigger = get_value ( db->argv4);
+	  int speed = get_value ( db->argv5);
+	  int delay   = get_value ( db->argv6);
+	  int endpulse   = get_value ( db->argv7);
+
+	  add_readoutdevice ( new daq_device_CAENdrs_std( eventtype,
+							  subid,
+							  linknumber, 
+							  trigger, 
+							  speed, 
+							  delay,
+							  endpulse));
+	  return 0;  // say "we handled this request" 
+	}
+
       else
 	{
 	  return 1; // say it is our device but the parameters are wrong 
@@ -185,8 +217,8 @@ void CAENdrs_plugin::identify(std::ostream& os, const int flag) const
   else
     {
       os << " - CAEN DRS Plugin, provides - " << std::endl;
-      os << " -     device_CAENdrs (evttype, subid, link_nr, trigger) - CAEN V1742 custom config" << std::endl;
-      os << " -     device_CAENdrs_std (evttype, subid, link_nr, trigger, speed, delay[%]) - CAEN V1742 standard config" << std::endl;
+      os << " -     device_CAENdrs (evttype, subid, link_nr, trigger, endpulse) - CAEN V1742 custom config" << std::endl;
+      os << " -     device_CAENdrs_std (evttype, subid, link_nr, trigger, speed, delay[%], endpulse) - CAEN V1742 standard config" << std::endl;
       os << " -     device_CAENPulse (evttype, subid, link_nr ) - CAEN V1742 pulse generator" << std::endl;
     }
       

@@ -23,7 +23,7 @@ caen_manager::caen_manager( const int linknumber)
   handle = 0;
   int node = 0;
 
-  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_PCI_OpticalLink, _linknumber , node, 0 ,&handle);
+  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , node, 0 ,&handle);
 
   if ( _broken )
     {

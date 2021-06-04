@@ -16,7 +16,8 @@ public:
   daq_device_CAENdrs(const int eventtype
 		     , const int subeventid
 		     , const int linknumber = 0
-		     , const int trigger = 1);
+		     , const int trigger = 0
+                     , const int endpulse = 0);
     
   ~daq_device_CAENdrs();
 
@@ -50,6 +51,8 @@ public:
   int _trigger;
   int _trigger_handler;
   int _linknumber;
+  int _endpulse;
+  
   CAEN_DGTZ_DRS4Frequency_t _speed;
 
   CAEN_DGTZ_X742_EVENT_t *_Event742;

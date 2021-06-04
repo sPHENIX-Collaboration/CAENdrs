@@ -18,7 +18,8 @@ public:
 			 , const int linknumber = 0
 			 , const int trigger = 1
 			 , const int speed = 0
-			 , const int delay = 0);
+			 , const int delay = 0
+			 , const int endpulse = 0);
     
   ~daq_device_CAENdrs_std();
 
@@ -51,6 +52,8 @@ public:
   int _trigger;
   int _trigger_handler;
   int _linknumber;
+  int _endpulse;
+  
   CAEN_DGTZ_DRS4Frequency_t _speed;
   int _delay;
 

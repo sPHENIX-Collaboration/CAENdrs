@@ -19,14 +19,16 @@ daq_device_CAENdrs_std::daq_device_CAENdrs_std(const int eventtype
 					       , const int linknumber
 					       , const int trigger  // do I give the system trigger?
 					       , const int speed
-					       , const int delay)
+					       , const int delay
+					       , const int endpulse)
 {
 
   m_eventType  = eventtype;
   m_subeventid = subeventid;
 
   _linknumber = linknumber;
-
+  _endpulse = endpulse;
+  
   handle = 0;
   _Event742 = 0;
 
@@ -35,7 +37,7 @@ daq_device_CAENdrs_std::daq_device_CAENdrs_std(const int eventtype
   _warning = 0;
 
   cout << "*************** opening Digitizer" << endl;
-  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_PCI_OpticalLink, _linknumber , node, 0 ,&handle);
+  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , node, 0 ,&handle);
   cout << "*************** " << _broken  << endl;
 
 
@@ -328,6 +330,17 @@ int daq_device_CAENdrs_std::put_data(const int etype, int * adr, const int lengt
   sevt->sub_length += len;
   //cout << __LINE__ << "  " << __FILE__ << " returning "  << sevt->sub_length << endl;
 
+  if ( _endpulse)
+    {
+      const unsigned int reg    = 0x811C;
+      const unsigned int pulseon  = 0xC000;
+      const unsigned int pulseoff = 0x8000;
+      
+      _broken = CAEN_DGTZ_WriteRegister(handle, reg, pulseon);
+      _broken = CAEN_DGTZ_WriteRegister(handle, reg, pulseoff);
+    } 
+
+  
   return  sevt->sub_length;
 }
 
@@ -380,6 +393,7 @@ void daq_device_CAENdrs_std::identify(std::ostream& os) const
 	 << " speed "  << getGS() <<  "GS"
 	 << " delay "  << _delay <<  "% ";
       if (_trigger_handler) os << " *Trigger" ;
+      if (_endpulse) os << " *endpulse" ;
       if (_warning) os << " **** warning - check setup parameters ****";
       os << endl;
 

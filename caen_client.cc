@@ -26,6 +26,7 @@ void exithelp( const int ret =1)
   cout  << std::endl;
   cout << " caen_client usage " << std::endl;
   cout << "    -d link (optical fiber) number,  default 0 " << std::endl;
+  cout << "    -n node sub-module for daisy-chained setups,  default 0 " << std::endl;
   cout << "    -v increase verbosity, multiple -v for more" << std::endl;
   cout <<  std::endl;
   cout << "   caen_client status                    provide an overview of most registers" << std::endl;
@@ -75,9 +76,10 @@ int main(int argc, char *argv[])
 
   int verbosity = 0;
   int linknum = 0;
+  int node = 0;
 
   int opt;
-  while ((opt = getopt(argc, argv, "hvd:")) != EOF)
+  while ((opt = getopt(argc, argv, "hvd:n:")) != EOF)
     {
       switch (opt) 
 	{
@@ -85,6 +87,11 @@ int main(int argc, char *argv[])
 	case 'd':
 	  if ( !sscanf(optarg, "%d",  &linknum) ) exithelp();
 	  if ( linknum < 0 || linknum > 15) exithelp();
+	  break;
+
+	case 'n':
+	  if ( !sscanf(optarg, "%d",  &node) ) exithelp();
+	  if ( node < 0 || node > 7) exithelp();
 	  break;
 
 	case 'v':
@@ -102,7 +109,7 @@ int main(int argc, char *argv[])
     }
 
 
-  caen_manager * cm = new caen_manager(linknum);
+  caen_manager * cm = new caen_manager(linknum, node);
   if (cm->GetStatus())
     {
       cout << "Failure, Status = "  << cm->GetStatus() << endl;
@@ -303,7 +310,7 @@ int main(int argc, char *argv[])
       else if ( strcmp( argv[optind], "identify") == 0)  
 	{
 	  cm->identify();
-	  status =0;
+	  status = 0;
 	}
       else if ( strcmp( argv[optind], "help") == 0)  
 	{

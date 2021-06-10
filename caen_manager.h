@@ -8,7 +8,7 @@
 class caen_manager {
 public:
 
-  caen_manager( const int linknumber);
+  caen_manager( const int linknumber, const int node= 0);
     
   ~caen_manager();
 
@@ -82,6 +82,7 @@ public:
   int handle;
 
   int _linknumber;
+  int _node;
 
 };
 

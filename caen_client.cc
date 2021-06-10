@@ -303,6 +303,7 @@ int main(int argc, char *argv[])
       else if ( strcmp( argv[optind], "identify") == 0)  
 	{
 	  cm->identify();
+	  status =0;
 	}
       else if ( strcmp( argv[optind], "help") == 0)  
 	{

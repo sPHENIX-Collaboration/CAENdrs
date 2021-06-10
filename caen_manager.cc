@@ -15,15 +15,15 @@
 
 using namespace std;
 
-caen_manager::caen_manager( const int linknumber)
+caen_manager::caen_manager( const int linknumber, const int node)
 {
 
   _linknumber = linknumber;
+  _node = node;
 
   handle = 0;
-  int node = 0;
 
-  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , node, 0 ,&handle);
+  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _node, 0 ,&handle);
 
   if ( _broken )
     {

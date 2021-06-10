@@ -17,6 +17,7 @@ using namespace std;
 daq_device_CAENdrs::daq_device_CAENdrs(const int eventtype
 				       , const int subeventid
 				       , const int linknumber
+				       , const int nodenumber
 				       , const int trigger
 				       , const int endpulse)
 {
@@ -25,6 +26,7 @@ daq_device_CAENdrs::daq_device_CAENdrs(const int eventtype
   m_subeventid = subeventid;
 
   _linknumber = linknumber;
+  _nodenumber = nodenumber;
   _endpulse = endpulse;
   
   handle = 0;
@@ -35,7 +37,7 @@ daq_device_CAENdrs::daq_device_CAENdrs(const int eventtype
   _warning = 0;
 
   cout << "*************** opening Digitizer" << endl;
-  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , node, 0 ,&handle);
+  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _nodenumber, 0 ,&handle);
   cout << "*************** " << _broken  << endl;
 
 

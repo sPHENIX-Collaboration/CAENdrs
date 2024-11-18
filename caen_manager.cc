@@ -23,8 +23,11 @@ caen_manager::caen_manager( const int linknumber, const int node)
 
   handle = 0;
 
+  //cout << "*************** opening Digitizer with link " << _linknumber << "  nodenumber  " << _node  << endl;
   _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _node, 0 ,&handle);
+  //cout << "*************** " << _broken  << " handle = " << handle << endl;
 
+  
   if ( _broken )
     {
       cout << " Error in CAEN_DGTZ_OpenDigitizer " << endl;

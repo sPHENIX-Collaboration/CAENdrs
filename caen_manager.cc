@@ -468,12 +468,33 @@ int caen_manager::WriteRegister (const unsigned int adr, const unsigned int valu
 {
   return CAEN_DGTZ_WriteRegister(handle, adr, value);
 }
+
 int caen_manager::ReadRegister (const unsigned int adr)
 {
   unsigned int value;
   int status = CAEN_DGTZ_ReadRegister(handle, adr, &value);
   if (status ) return status;
   return value;
+}
+
+int caen_manager::ClearRegisterBit( const unsigned int adr, const int bit)
+{
+  if ( bit < 0 || bit >31) return -1;
+  
+  int value = ReadRegister(adr);
+  value &= (0xffffffff ^ (1<<bit));
+  int status = WriteRegister(adr, value);
+  return status;
+}
+
+int caen_manager::SetRegisterBit( const unsigned int adr, const int bit)
+{
+  if ( bit < 0 || bit >31) return -1;
+  
+  int value = ReadRegister(adr);
+  value |= (1<<bit);
+  int status = WriteRegister(adr, value);
+  return status;
 }
 
 
@@ -532,7 +553,9 @@ int  caen_manager::init()
 
   SetChannelDCOffset(0x8f00);
 
-
+  // set the EGTTT bit to make 60 bit time stamps
+  SetRegisterBit(0x8000,2);
+  
   SetFastTriggerMode(1);
 
   return _broken;

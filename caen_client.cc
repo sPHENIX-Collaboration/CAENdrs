@@ -54,10 +54,14 @@ void exithelp( const int ret =1)
   cout << "   caen_client SetChannelDCOffset channel value       set DAC offset for channel" << std::endl;
   cout << "   caen_client SetChannelDCOffset value               set DAC offset for all channels" << std::endl;
   cout << "   caen_client PrintCalibrationData frequency chip    print out the correction data for this frequency and chip" << std::endl;
+  cout << "   caen_client SoftwareTrigger                        generate one software trigger" << std::endl;
 
 
   cout << "   caen_client WriteRegister address value            low-level write to a register" << std::endl;
   cout << "   caen_client ReadRegister address                   low-level read from a register" << std::endl;
+
+  cout << "   caen_client SetRegisterBit address bit             set  this bit in a register" << std::endl;
+  cout << "   caen_client ClearRegisterBit address bit           clear this bit in a register" << std::endl;
 
 
   //  cout << "   caen_client reset     full board reset" << std::endl;
@@ -295,11 +299,37 @@ int main(int argc, char *argv[])
 	  if ( val < 0) status = val;
 	}
 
-     
+      else if ( strcmp( argv[optind], "SetRegisterBit") == 0)  
+	{
+	  if ( argc > optind + 2 ) 
+	    {
+	      index = get_uvalue( argv[optind+1]);
+	      val   = get_uvalue( argv[optind+2]);
+	      status = cm->SetRegisterBit(index, val);
+	    }
+	  else
+	    {
+	      status = -1;
+	    }
+	}
+
+      else if ( strcmp( argv[optind], "ClearRegisterBit") == 0)  
+	{
+	  if ( argc > optind + 2 ) 
+	    {
+	      index = get_uvalue( argv[optind+1]);
+	      val   = get_uvalue( argv[optind+2]);
+	      status = cm->ClearRegisterBit(index, val);
+	    }
+	  else
+	    {
+	      status = -1;
+	    }
+	}
     }
 
-  else
-    {
+      else
+	{
 
       if ( strcmp( argv[optind], "init") == 0)  
 	{
@@ -312,7 +342,12 @@ int main(int argc, char *argv[])
 	  cm->identify();
 	  status = 0;
 	}
-      else if ( strcmp( argv[optind], "help") == 0)  
+     else if ( strcmp( argv[optind], "SoftwareTrigger") == 0)  
+	{
+	  cm->WriteRegister(0x8108, 1);
+	  status = 0;
+	}
+       else if ( strcmp( argv[optind], "help") == 0)  
 	{
 	  delete cm;
 	  exithelp(0);

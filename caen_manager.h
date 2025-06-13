@@ -63,6 +63,9 @@ public:
 
   int WriteRegister (const unsigned int adr, const unsigned int value);
   int ReadRegister (const unsigned int adr);
+  int ClearRegisterBit( const unsigned int adr, const int bit);
+  int SetRegisterBit(const unsigned int adr, const int bit);
+
 
   void identify(std::ostream& os = std::cout) const;
 
@@ -70,6 +73,7 @@ public:
   
   int GetStatus() const { return _broken;};
 
+  
   int PrintCalibrationData(const int frequency, const int chip, std::ostream &os = std::cout);
   
  protected:

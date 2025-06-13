@@ -38,19 +38,19 @@ daq_device_CAENdrs_std::daq_device_CAENdrs_std(const int eventtype
 
   _warning = 0;
 
-  cout << "*************** opening Digitizer" << endl;
+  cout << "*************** opening Digitizer with link " << _linknumber << "  nodenumber  " << _nodenumber  << endl;
   _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _nodenumber, 0 ,&handle);
-  cout << "*************** " << _broken  << endl;
+  cout << "*************** " << _broken  << " handle = " << handle << endl;
 
 
 
-  _broken =  CAEN_DGTZ_Reset(handle);
+  // _broken =  CAEN_DGTZ_Reset(handle);
 
-  if ( _broken )
-    {
-      cout << " Error in CAEN_DGTZ_OpenDigitizer " << _broken << endl;
-      return;
-    }
+  // if ( _broken )
+  //   {
+  //     cout << " Error in CAEN_DGTZ_OpenDigitizer " << _broken << endl;
+  //     return;
+  //   }
 
   _trigger_handler=0;
   if (trigger)   _trigger_handler=1;
@@ -129,7 +129,7 @@ int  daq_device_CAENdrs_std::init()
 
 
 
-  // enable adding the trigger channels to teh readout
+  // enable adding the trigger channels to the readout
   _broken = CAEN_DGTZ_SetFastTriggerDigitizing(handle,CAEN_DGTZ_ENABLE);
   if ( _broken )
     {
@@ -236,6 +236,17 @@ int  daq_device_CAENdrs_std::init()
     }
 
 
+  // set the EGTTT bit to make 60 bit time stamps
+
+  const unsigned int reg    = 0x8000;
+  unsigned int reg8000;
+      
+  _broken = CAEN_DGTZ_ReadRegister(handle, reg, &reg8000);
+  reg8000 |= 0x4;
+  _broken = CAEN_DGTZ_WriteRegister(handle, reg,reg8000);
+
+
+  
   // set DC offsets
   unsigned int i;
   for ( i = 0; i < 32; i++)

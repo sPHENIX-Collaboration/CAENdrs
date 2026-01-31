@@ -12,8 +12,10 @@ include_HEADERS =
 lib_LTLIBRARIES =  librcdaqplugin_CAENdrs.la
 
 librcdaqplugin_CAENdrs_la_SOURCES = \
+	daq_device_CAENDigitizer.cc \
 	daq_device_CAENdrs_std.cc \
 	daq_device_CAENdrs.cc \
+	daq_device_CAEN_DT57xx.cc \
 	daq_device_CAENPulse.cc \
 	CAENdrsTriggerHandler.cc \
 	CAENdrs_plugin.cc

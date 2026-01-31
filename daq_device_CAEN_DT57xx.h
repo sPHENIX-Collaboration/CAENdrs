@@ -1,5 +1,5 @@
-#ifndef __DAQ_DEVICE_CAENDRS__
-#define __DAQ_DEVICE_CAENDRS__
+#ifndef __DAQ_DEVICE_CAEN_DT57xx__
+#define __DAQ_DEVICE_CAEN_DT57xx__
 
 
 #include <daq_device_CAENDigitizer.h>
@@ -8,19 +8,19 @@
 #include <CAENDigitizerType.h>
 
 
-class daq_device_CAENdrs: public  daq_device_CAENDigitizer {
+class daq_device_CAEN_DT57xx: public  daq_device_CAENDigitizer {
 
 
 public:
 
-  daq_device_CAENdrs(const int eventtype
+  daq_device_CAEN_DT57xx(const int eventtype
 		     , const int subeventid
 		     , const int linknumber = 0
 		     , const int nodenumber = 0
 		     , const int trigger = 0
                      , const int endpulse = 0);
     
-  ~daq_device_CAENdrs();
+  ~daq_device_CAEN_DT57xx();
 
 
   void identify(std::ostream& os = std::cout) const;

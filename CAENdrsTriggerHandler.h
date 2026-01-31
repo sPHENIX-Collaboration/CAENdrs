@@ -10,10 +10,11 @@ class CAENdrsTriggerHandler : public TriggerHandler {
 
 public:
 
-  CAENdrsTriggerHandler(int handle, const int etype = 1)
+  CAENdrsTriggerHandler(int handle, const int etype = 1, const int is_USB=0)
     {
       _handle = handle;
       _etype = etype;
+      _is_USB = is_USB;
     }
 
   ~CAENdrsTriggerHandler() {};
@@ -27,7 +28,7 @@ public:
   
   int _handle;
   int _etype ;
-
+  int _is_USB;
 
 };
 

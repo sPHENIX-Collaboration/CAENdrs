@@ -1,0 +1,195 @@
+
+#include <iostream>
+
+#include <daq_device_CAENDigitizer.h>
+#include <string.h>
+
+#include <CAENDigitizer.h>
+#include <CAENDigitizerType.h>
+
+#define VME_INTERRUPT_LEVEL      1
+#define VME_INTERRUPT_STATUS_ID  0xAAAA
+#define INTERRUPT_MODE           CAEN_DGTZ_IRQ_MODE_ROAK
+
+
+using namespace std;
+
+daq_device_CAENDigitizer::daq_device_CAENDigitizer(const int eventtype
+				       , const int subeventid
+				       , const int linknumber
+				       , const int nodenumber
+				       , const int trigger
+				       , const int endpulse)
+{
+
+  m_eventType  = eventtype;
+  m_subeventid = subeventid;
+
+  _linknumber = linknumber;
+  _nodenumber = nodenumber;
+  _endpulse = endpulse;
+  
+  handle = 0;
+  _Event742 = 0;
+
+  int node = 0;
+
+  _warning = 0;
+
+
+}
+
+daq_device_CAENDigitizer::~daq_device_CAENDigitizer()
+{
+
+
+}
+
+
+int  daq_device_CAENDigitizer::init()
+{
+  
+  return 0;
+
+}
+
+// the put_data function
+
+int daq_device_CAENDigitizer::put_data(const int etype, int * adr, const int length )
+{
+
+  if ( _broken ) 
+    {
+      //      cout << __LINE__ << "  " << __FILE__ << " broken ";
+      //      identify();
+      return 0; //  we had a catastrophic failure
+    }
+
+  if (etype != m_eventType )  // not our id
+    {
+      return 0;
+    }
+
+  if ( length < max_length(etype) ) 
+    {
+      //      cout << __LINE__ << "  " << __FILE__ << " length " << length <<endl;
+      return 0;
+    }
+
+
+  int len = 0;
+
+  sevt =  (subevtdata_ptr) adr;
+  // set the initial subevent length
+  sevt->sub_length =  SEVTHEADERLENGTH;
+
+  // update id's etc
+  sevt->sub_id =  m_subeventid;
+  sevt->sub_type=4;
+  sevt->sub_decoding = 85;
+  sevt->reserved[0] = 0;
+  sevt->reserved[1] = 0;
+
+  uint32_t buffersize = 0;
+
+  while ( buffersize == 0) 
+    {
+      // Read data from the board 
+      _broken = CAEN_DGTZ_ReadData(handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, (char *) &sevt->data, &buffersize);
+      if ( _broken )
+	{
+	  cout << __FILE__ << " " << __LINE__ << " _broken = " << _broken<< endl;
+	  return 1;
+	}
+      //      cout << __FILE__ << " " << __LINE__ << " buffersize = " << buffersize << endl;
+    }
+
+  len = buffersize /4;
+  
+  sevt->sub_padding = len%2;
+  len += sevt->sub_padding;
+  sevt->sub_length += len;
+  //cout << __LINE__ << "  " << __FILE__ << " returning "  << sevt->sub_length << endl;
+
+  if ( _endpulse)
+    {
+      const unsigned int reg    = 0x811C;
+      const unsigned int pulseon  = 0xC000;
+      const unsigned int pulseoff = 0x8000;
+      
+      _broken = CAEN_DGTZ_WriteRegister(handle, reg, pulseon);
+      _broken = CAEN_DGTZ_WriteRegister(handle, reg, pulseoff);
+    } 
+  
+  return  sevt->sub_length;
+}
+
+
+
+int daq_device_CAENDigitizer::getDelay() const
+{
+  unsigned int i;
+  int status =  CAEN_DGTZ_GetPostTriggerSize(handle, &i);
+  return i;
+}
+
+
+int daq_device_CAENDigitizer::SetConfigRegisterBit( const int bit)
+{
+  const unsigned int forbidden_mask = 0x0FFFE7B7;  // none of these bits must be touched
+  unsigned int pattern = 1<<bit;
+  if ( pattern & forbidden_mask)
+    {
+      cout << " attemt to set reserved bit: " << bit << endl;
+      return 1;
+    }
+
+  return CAEN_DGTZ_WriteRegister(handle,CAEN_DGTZ_BROAD_CH_CONFIGBIT_SET_ADD, pattern);
+}
+
+int daq_device_CAENDigitizer::ClearConfigRegisterBit( const int bit)
+{
+  const unsigned int forbidden_mask = 0x0FFFE7B7;  // none of these bits must be touched
+  unsigned int pattern = 1<<bit;
+  if ( pattern & forbidden_mask)
+    {
+      cout << " attemt to set reserved bit: " << bit << endl;
+      return 1;
+    }
+
+  return CAEN_DGTZ_WriteRegister(handle,CAEN_DGTZ_BROAD_CH_CLEAR_CTRL_ADD, pattern);
+}
+
+
+float daq_device_CAENDigitizer::getGS() const
+{
+  if ( _broken ) 
+    {
+      //      cout << __LINE__ << "  " << __FILE__ << " broken ";
+      //      identify();
+      return 0; //  we had a catastrophic failure
+    }
+
+
+  CAEN_DGTZ_DRS4Frequency_t  mode;
+  int status =  CAEN_DGTZ_GetDRS4SamplingFrequency(handle, &mode);
+  switch (mode)
+    {
+    case CAEN_DGTZ_DRS4_5GHz:
+      return 5;
+      break;
+
+    case CAEN_DGTZ_DRS4_2_5GHz:
+      return 2.5;
+      break;
+
+    case CAEN_DGTZ_DRS4_1GHz:
+      return 1;
+      break;
+      
+    default:
+      return -1;
+    }
+  return -1; 
+}
+

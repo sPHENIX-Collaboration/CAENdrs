@@ -1,0 +1,69 @@
+#ifndef __DAQ_DEVICE_CAENDIGITIZER__
+#define __DAQ_DEVICE_CAENDIGITIZER__
+
+
+#include <daq_device.h>
+#include <stdio.h>
+#include <CAENdrsTriggerHandler.h>
+#include <CAENDigitizerType.h>
+
+
+class daq_device_CAENDigitizer: public  daq_device {
+
+
+public:
+
+  daq_device_CAENDigitizer(const int eventtype
+		     , const int subeventid
+		     , const int linknumber = 0
+		     , const int nodenumber = 0
+		     , const int trigger = 0
+                     , const int endpulse = 0);
+    
+  ~daq_device_CAENDigitizer();
+
+
+  void identify(std::ostream& os = std::cout) const =0;
+
+  int max_length(const int etype) const =0;
+
+  // functions to do the work
+
+  int put_data(const int etype, int * adr, const int length);
+
+  int init() = 0;
+  int rearm( const int etype) =0;
+  int endrun() = 0;
+
+ protected:
+
+  int ClearConfigRegisterBit( const int bit);
+  int SetConfigRegisterBit( const int bit);
+  float getGS() const;
+  int getDelay() const;
+
+  int _broken;
+  int _warning;
+
+  subevtdata_ptr sevt;
+
+  int handle;
+
+  int _trigger;
+  int _trigger_handler;
+  int _linknumber;
+  int _nodenumber;
+  int _endpulse;
+  
+  CAEN_DGTZ_DRS4Frequency_t _speed;
+
+  CAEN_DGTZ_X742_EVENT_t *_Event742;
+  uint32_t AllocatedSize, BufferSize, NumEvents;
+
+
+  CAENdrsTriggerHandler *_th;
+
+};
+
+
+#endif

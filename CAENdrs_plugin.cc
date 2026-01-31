@@ -4,6 +4,7 @@
 
 #include <daq_device_CAENdrs.h>
 #include <daq_device_CAENdrs_std.h>
+#include <daq_device_CAEN_DT57xx.h>
 #include <daq_device_CAENPulse.h>
 
 #include <strings.h>
@@ -86,8 +87,8 @@ int CAENdrs_plugin::create_device(deviceblock *db)
 	{
 	  int linknumber = get_value ( db->argv3);
 	  int nodenumber = get_value ( db->argv4);
-	  int trigger = get_value ( db->argv4);
-	  int endpulse = get_value ( db->argv5);
+	  int trigger    = get_value ( db->argv5);
+	  int endpulse   = get_value ( db->argv6);
 
 	  add_readoutdevice ( new daq_device_CAENdrs( eventtype,
 						      subid,
@@ -100,6 +101,83 @@ int CAENdrs_plugin::create_device(deviceblock *db)
 
     }
   
+
+
+  else if ( strcasecmp(db->argv0,"device_CAEN_DT57xx") == 0 ) 
+    {
+      // we need at least 3 params
+      if ( db->npar <3 ) return 1; // indicate wrong params
+      
+      eventtype  = get_value ( db->argv1); // event type
+      subid = get_value ( db->argv2); // subevent id
+
+      if ( db->npar == 3)
+	{
+
+	  add_readoutdevice ( new daq_device_CAEN_DT57xx( eventtype,
+							  subid ));
+	  return 0;  // say "we handled this request" 
+	}
+
+      else if ( db->npar == 4)
+	{
+	  int linknumber = get_value ( db->argv3);
+	  
+	  
+	  add_readoutdevice ( new daq_device_CAEN_DT57xx( eventtype,
+							  subid,
+							  linknumber ));
+	  return 0;  // say "we handled this request" 
+	}
+      
+      else if ( db->npar == 5)
+	{
+	  int linknumber = get_value ( db->argv3);
+	  int nodenumber = get_value ( db->argv4);
+	  
+	  
+	  add_readoutdevice ( new daq_device_CAEN_DT57xx( eventtype,
+						      subid,
+						      linknumber,
+						      nodenumber));
+	  return 0;  // say "we handled this request" 
+	}
+      
+
+
+      else if ( db->npar == 6)
+	{
+	  int linknumber = get_value ( db->argv3);
+	  int nodenumber = get_value ( db->argv4);
+	  int trigger = get_value ( db->argv5);
+
+	  add_readoutdevice ( new daq_device_CAEN_DT57xx( eventtype,
+						      subid,
+						      linknumber, 
+						      nodenumber,
+						      trigger ));
+	  return 0;  // say "we handled this request" 
+	}
+
+      else if ( db->npar == 7)
+	{
+	  int linknumber = get_value ( db->argv3);
+	  int nodenumber = get_value ( db->argv4);
+	  int trigger    = get_value ( db->argv5);
+	  int endpulse   = get_value ( db->argv6);
+
+	  add_readoutdevice ( new daq_device_CAEN_DT57xx( eventtype,
+						      subid,
+						      linknumber, 
+						      nodenumber,
+						      trigger,
+						      endpulse));
+	  return 0;  // say "we handled this request" 
+	}
+
+    }
+  
+
   else if ( strcasecmp(db->argv0,"device_CAENdrs_std") == 0 ) 
     {
       // we need at least 3 params
@@ -259,6 +337,7 @@ void CAENdrs_plugin::identify(std::ostream& os, const int flag) const
       os << " - CAEN DRS Plugin, provides - " << std::endl;
       os << " -     device_CAENdrs (evttype, subid, link_nr, node_nr, trigger, endpulse) - CAEN V1742 custom config" << std::endl;
       os << " -     device_CAENdrs_std (evttype, subid, link_nr, node_nr, trigger, speed, delay[%], endpulse) - CAEN V1742 standard config" << std::endl;
+      os << " -     device_CAEN_DT57xx (evttype, subid, link_nr, node_nr, trigger, speed, delay[%], endpulse) - CAEN DT57xx desktop model via USB" << std::endl;
       os << " -     device_CAENPulse (evttype, subid, link_nr, node_nr ) - CAEN V1742 pulse generator" << std::endl;
     }
       

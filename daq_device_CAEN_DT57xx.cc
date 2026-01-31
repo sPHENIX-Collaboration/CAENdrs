@@ -1,7 +1,7 @@
 
 #include <iostream>
 
-#include <daq_device_CAENdrs.h>
+#include <daq_device_CAEN_DT57xx.h>
 #include <string.h>
 
 #include <CAENDigitizer.h>
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-daq_device_CAENdrs::daq_device_CAENdrs(const int eventtype
+daq_device_CAEN_DT57xx::daq_device_CAEN_DT57xx(const int eventtype
 				       , const int subeventid
 				       , const int linknumber
 				       , const int nodenumber
@@ -24,8 +24,8 @@ daq_device_CAENdrs::daq_device_CAENdrs(const int eventtype
 {
 
   cout << "*************** opening Digitizer" << endl;
-  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _nodenumber, 0 ,&handle);
-  //  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_USB, _linknumber , _nodenumber, 0 ,&handle);
+  //  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _nodenumber, 0 ,&handle);
+  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_USB, _linknumber , _nodenumber, 0 ,&handle);
   cout << "*************** " << _broken  << endl;
 
 
@@ -43,7 +43,7 @@ daq_device_CAENdrs::daq_device_CAENdrs(const int eventtype
   if ( _trigger_handler )
     {
       cout << __LINE__ << "  " << __FILE__ << " registering triggerhandler " << endl;
-      _th  = new CAENdrsTriggerHandler (handle, m_eventType, 0);
+      _th  = new CAENdrsTriggerHandler (handle, m_eventType, 1);
       registerTriggerHandler ( _th);
     }
   else
@@ -54,7 +54,16 @@ daq_device_CAENdrs::daq_device_CAENdrs(const int eventtype
 }
 
 
-daq_device_CAENdrs::~daq_device_CAENdrs()
+int daq_device_CAEN_DT57xx::max_length(const int etype) const
+{
+  if (etype != m_eventType) return 0;
+  return  (14900/2);
+}
+
+
+
+
+daq_device_CAEN_DT57xx::~daq_device_CAEN_DT57xx()
 {
 
   if (_th)
@@ -74,7 +83,7 @@ daq_device_CAENdrs::~daq_device_CAENdrs()
 
 
 
-int  daq_device_CAENdrs::init()
+int  daq_device_CAEN_DT57xx::init()
 {
   
   if ( _broken ) 
@@ -127,7 +136,7 @@ int  daq_device_CAENdrs::init()
 }
 
 // the rearm() function
-int  daq_device_CAENdrs::rearm(const int etype)
+int  daq_device_CAEN_DT57xx::rearm(const int etype)
 {
   if ( _broken ) 
     {
@@ -141,7 +150,7 @@ int  daq_device_CAENdrs::rearm(const int etype)
   return 0;
 }
 
-int daq_device_CAENdrs::endrun()
+int daq_device_CAEN_DT57xx::endrun()
 {
   if ( _broken ) 
     {
@@ -158,14 +167,8 @@ int daq_device_CAENdrs::endrun()
 
 }
 
-int daq_device_CAENdrs::max_length(const int etype) const
-{
-  if (etype != m_eventType) return 0;
-  return  (14900);
-}
 
-
-void daq_device_CAENdrs::identify(std::ostream& os) const
+void daq_device_CAEN_DT57xx::identify(std::ostream& os) const
 {
 
   CAEN_DGTZ_BoardInfo_t       BoardInfo;
@@ -173,7 +176,7 @@ void daq_device_CAENdrs::identify(std::ostream& os) const
 
   if ( _broken) 
     {
-      os << "CAEN Digitizer Event Type: " << m_eventType 
+      os << "CAEN DT57xx Digitizer Event Type: " << m_eventType 
 	 << " Subevent id: " << m_subeventid 
 	 << " ** not functional ** " << endl;
     }

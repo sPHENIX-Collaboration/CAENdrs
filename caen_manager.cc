@@ -15,18 +15,28 @@
 
 using namespace std;
 
-caen_manager::caen_manager( const int linknumber, const int node)
+caen_manager::caen_manager( const int linknumber, const int node, const int is_USB)
 {
 
+  _is_USB = is_USB;
   _linknumber = linknumber;
   _node = node;
 
   handle = 0;
 
-  //cout << "*************** opening Digitizer with link " << _linknumber << "  nodenumber  " << _node  << endl;
-  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _node, 0 ,&handle);
-  //cout << "*************** " << _broken  << " handle = " << handle << endl;
-
+  if (_is_USB)
+    {
+      //cout << "*************** opening Digitizer with link " << _linknumber << "  nodenumber  " << _node  << endl;
+      _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_USB, _linknumber , _node, 0 ,&handle);
+      //cout << "*************** " << _broken  << " handle = " << handle << endl;
+    }
+  else
+    {
+      //cout << "*************** opening Digitizer with link " << _linknumber << "  nodenumber  " << _node  << endl;
+      _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _node, 0 ,&handle);
+      //cout << "*************** " << _broken  << " handle = " << handle << endl;
+    }
+    
   
   if ( _broken )
     {

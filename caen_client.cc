@@ -25,6 +25,7 @@ void exithelp( const int ret =1)
 
   cout  << std::endl;
   cout << " caen_client usage " << std::endl;
+  cout << "    -u use USB (default fiber) " << std::endl;
   cout << "    -d link (optical fiber) number,  default 0 " << std::endl;
   cout << "    -n node sub-module for daisy-chained setups,  default 0 " << std::endl;
   cout << "    -v increase verbosity, multiple -v for more" << std::endl;
@@ -81,9 +82,10 @@ int main(int argc, char *argv[])
   int verbosity = 0;
   int linknum = 0;
   int node = 0;
+  int is_USB = 0;
 
   int opt;
-  while ((opt = getopt(argc, argv, "hvd:n:")) != EOF)
+  while ((opt = getopt(argc, argv, "hvud:n:")) != EOF)
     {
       switch (opt) 
 	{
@@ -96,6 +98,10 @@ int main(int argc, char *argv[])
 	case 'n':
 	  if ( !sscanf(optarg, "%d",  &node) ) exithelp();
 	  if ( node < 0 || node > 7) exithelp();
+	  break;
+
+	case 'u':
+	  is_USB = 1;
 	  break;
 
 	case 'v':
@@ -113,7 +119,7 @@ int main(int argc, char *argv[])
     }
 
 
-  caen_manager * cm = new caen_manager(linknum, node);
+  caen_manager * cm = new caen_manager(linknum, node, is_USB);
   if (cm->GetStatus())
     {
       cout << "Failure, Status = "  << cm->GetStatus() << endl;

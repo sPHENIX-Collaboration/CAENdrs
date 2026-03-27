@@ -16,6 +16,7 @@ using namespace std;
 
 daq_device_CAEN_DT57xx::daq_device_CAEN_DT57xx(const int eventtype
 				       , const int subeventid
+				       , const int CONET_Flag
 				       , const int linknumber
 				       , const int nodenumber
 				       , const int trigger
@@ -23,11 +24,30 @@ daq_device_CAEN_DT57xx::daq_device_CAEN_DT57xx(const int eventtype
   : daq_device_CAENDigitizer (eventtype,subeventid,linknumber,nodenumber,trigger,endpulse)
 {
 
-  cout << "*************** opening Digitizer" << endl;
-  //  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _nodenumber, 0 ,&handle);
-  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_USB, _linknumber , _nodenumber, 0 ,&handle);
-  cout << "*************** " << _broken  << endl;
+  cout << eventtype << " "
+       << subeventid << " " 
+       << CONET_Flag << " " 
+       << linknumber << " " 
+       << nodenumber << " " 
+       << trigger << endl;
 
+    if (CONET_Flag)
+    {
+      _is_conet = 1;
+      cout << "*************** opening Digitizer for conet with link number " << _linknumber << endl;
+      //  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _nodenumber, 0 ,&handle);
+      _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_USB_A4818, _linknumber , _nodenumber, 0 ,&handle);
+      cout << "*************** " << _broken  << endl;
+    }
+  else
+    {
+      _is_conet = 0;
+      cout << "*************** opening Digitizer" << endl;
+      //  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _nodenumber, 0 ,&handle);
+      _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_USB, _linknumber , _nodenumber, 0 ,&handle);
+      cout << "*************** " << _broken  << endl;
+    }
+    
 
   _broken =  CAEN_DGTZ_Reset(handle);
 
@@ -42,8 +62,16 @@ daq_device_CAEN_DT57xx::daq_device_CAEN_DT57xx(const int eventtype
  
   if ( _trigger_handler )
     {
-      cout << __LINE__ << "  " << __FILE__ << " registering triggerhandler " << endl;
-      _th  = new CAENdrsTriggerHandler (handle, m_eventType, 1);
+      if ( _is_conet)
+	{
+	  cout << __LINE__ << "  " << __FILE__ << " registering triggerhandler " << endl;
+	  _th  = new CAENdrsTriggerHandler (handle, m_eventType, 2);
+	}
+      else
+	{
+	  cout << __LINE__ << "  " << __FILE__ << " registering triggerhandler " << endl;
+	  _th  = new CAENdrsTriggerHandler (handle, m_eventType, 1);
+	}
       registerTriggerHandler ( _th);
     }
   else
@@ -92,16 +120,19 @@ int  daq_device_CAEN_DT57xx::init()
       return 0; //  we had a catastrophic failure
     } 
 
-  // configure interrupts and trigger
-  _broken |= CAEN_DGTZ_SetInterruptConfig( handle, CAEN_DGTZ_ENABLE,
-                                           VME_INTERRUPT_LEVEL, VME_INTERRUPT_STATUS_ID,
-                                           1, INTERRUPT_MODE);
-  if ( _broken )
+  if ( ! _is_conet )
     {
-      cout << __FILE__ << " " <<  __LINE__ << " Error: " << _broken << endl;
-      return 0;
+      // configure interrupts and trigger
+      _broken |= CAEN_DGTZ_SetInterruptConfig( handle, CAEN_DGTZ_ENABLE,
+					       VME_INTERRUPT_LEVEL, VME_INTERRUPT_STATUS_ID,
+					       1, INTERRUPT_MODE);
+      if ( _broken )
+	{
+	  cout << __FILE__ << " " <<  __LINE__ << " Error: " << _broken << endl;
+	  return 0;
+	}
     }
-
+  
   _broken = CAEN_DGTZ_SetAcquisitionMode(handle, CAEN_DGTZ_SW_CONTROLLED);
   if ( _broken )
     {
@@ -192,8 +223,9 @@ void daq_device_CAEN_DT57xx::identify(std::ostream& os) const
       
       os << "CAEN Digitizer Model " << BoardInfo.ModelName
 	 << " Event Type: " << m_eventType 
-	 << " Subevent id: " << m_subeventid 
-	 << " Firmware "     << BoardInfo.ROC_FirmwareRel << " / " << BoardInfo.AMC_FirmwareRel 
+	 << " Subevent id: " << m_subeventid; 
+      if ( _is_conet) os << "reading via CONET";  
+      os << " Firmware "     << BoardInfo.ROC_FirmwareRel << " / " << BoardInfo.AMC_FirmwareRel 
 	 << " speed "  << getGS() <<  "GS"
 	 << " delay "  << getDelay() <<  "% ";
       if (_trigger_handler) os << " *Trigger" ;

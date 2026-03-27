@@ -26,6 +26,7 @@ void exithelp( const int ret =1)
   cout  << std::endl;
   cout << " caen_client usage " << std::endl;
   cout << "    -u use USB (default fiber) " << std::endl;
+  cout << "    -c use CONET  " << std::endl;
   cout << "    -d link (optical fiber) number,  default 0 " << std::endl;
   cout << "    -n node sub-module for daisy-chained setups,  default 0 " << std::endl;
   cout << "    -v increase verbosity, multiple -v for more" << std::endl;
@@ -83,9 +84,10 @@ int main(int argc, char *argv[])
   int linknum = 0;
   int node = 0;
   int is_USB = 0;
+  int is_CONET = 0;
 
   int opt;
-  while ((opt = getopt(argc, argv, "hvud:n:")) != EOF)
+  while ((opt = getopt(argc, argv, "hvuc:d:n:")) != EOF)
     {
       switch (opt) 
 	{
@@ -104,6 +106,11 @@ int main(int argc, char *argv[])
 	  is_USB = 1;
 	  break;
 
+	case 'c':
+	  if ( !sscanf(optarg, "%d",  &linknum) ) exithelp();
+	  is_CONET = 2;
+	  break;
+
 	case 'v':
 	  verbosity++;
 	  break;
@@ -118,8 +125,24 @@ int main(int argc, char *argv[])
 	}
     }
 
+  if ( is_CONET && is_USB)
+    {
+      cout << "Cannot use both -u and -c " << endl;
+      return 1;
+    }
 
-  caen_manager * cm = new caen_manager(linknum, node, is_USB);
+  
+  caen_manager * cm;
+
+  if ( is_CONET)
+    {
+      cm = new caen_manager(linknum, node, is_CONET);
+    }
+  else
+    {
+      cm = new caen_manager(linknum, node, is_USB);
+    }
+    
   if (cm->GetStatus())
     {
       cout << "Failure, Status = "  << cm->GetStatus() << endl;

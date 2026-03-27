@@ -15,6 +15,7 @@ public:
 
   daq_device_CAEN_DT57xx(const int eventtype
 		     , const int subeventid
+		     , const int CONET_Flag = 0
 		     , const int linknumber = 0
 		     , const int nodenumber = 0
 		     , const int trigger = 0
@@ -33,7 +34,7 @@ public:
 
  protected:
 
-
+  int _is_conet;
 };
 
 

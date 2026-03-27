@@ -14,7 +14,7 @@ public:
     {
       _handle = handle;
       _etype = etype;
-      _is_USB = is_USB;
+      _is_USB = is_USB;  // 1= usb, 2 = via 4818 CONET
     }
 
   ~CAENdrsTriggerHandler() {};

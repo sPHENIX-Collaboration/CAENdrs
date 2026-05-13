@@ -57,7 +57,7 @@ daq_device_CAENdrs_std::daq_device_CAENdrs_std(const int eventtype
   if ( _trigger_handler )
     {
       cout << __LINE__ << "  " << __FILE__ << " registering triggerhandler " << endl;
-      _th  = new CAENdrsTriggerHandler (handle, m_eventType, 0);
+      _th  = new CAENdrsTriggerHandler (handle, m_eventType, max_length(m_eventType),0);
       registerTriggerHandler ( _th);
     }
   else

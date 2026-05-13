@@ -2,6 +2,8 @@
 #include "CAENdrsTriggerHandler.h"
 #include <iostream>
 
+#include <string.h>
+
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
 
@@ -10,38 +12,38 @@ using namespace std;
 
 int CAENdrsTriggerHandler::wait_for_trigger( const int moreinfo)
 {
+
+  //cout << __FILE__ << " " << __LINE__ << " entering wait_for_trigger" << endl;
+
   const int timeout = 1;
 
-  if (_is_USB ==1) // do a polling loop for USB
+  uint32_t buffersize = 0;
+  uint32_t count = 0;
+  
+  if (_is_USB) // do a polling loop
     {
-      int count=50000;
-      unsigned int  ev = 0;
-      int ret = CAEN_DGTZ_ReadRegister(_handle, CAEN_DGTZ_EVENT_STORED_ADD, &ev);
-      while (!ev)
+      while ( buffersize == 0 && count++ < 30000) // we make 50K polls before we make an "idle cycle" 
 	{
-	  ret = CAEN_DGTZ_ReadRegister(_handle, CAEN_DGTZ_EVENT_STORED_ADD, &ev);
-	  if ( count-- <= 0) return 0;
+	  // Read data from the board 
+	  int status = CAEN_DGTZ_ReadData(_handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, (char *) _buffer, &buffersize);
+	  if ( status )
+	    {
+	      cout << __FILE__ << " " << __LINE__ << " read status error = " <<  status << endl;
+	      return 0;
+	    }
 	}
-      cout << __LINE__ << "  " << __FILE__ << " register read  " << ret << " ev =" << ev  << endl;
-      return _etype;
-    }
 
-  if (_is_USB == 2) // do a polling loop for CONET
-    {
-      int count=5000;
-      unsigned int  ev = 0;
-      int ret = CAEN_DGTZ_ReadRegister(_handle, CAEN_DGTZ_ACQ_STATUS_ADD, &ev);
-      while (! ( ev & 0x8) )
+      _current_size = buffersize;
+      //cout << __FILE__ << " " << __LINE__ << " buffersize = " << buffersize ;
+      if ( buffersize)
 	{
-	  //cout << __LINE__ << "  " << __FILE__ << " register read  " << ret << " ev =0x" << hex << ev << dec << endl;
-	  ret = CAEN_DGTZ_ReadRegister(_handle, CAEN_DGTZ_ACQ_STATUS_ADD, &ev);
-	  if ( count-- <= 0) return 0;
-	  usleep(100);
+	  //cout << __FILE__ << " " << __LINE__ << " returning etpye " << _etype << endl; ;
+	  return _etype;
 	}
-      //cout << __LINE__ << "  " << __FILE__ << " register read  " << ret << " ev =" << ev  << endl;
-      return _etype;
+      //cout << endl;
+      return 0;
     }
-
+  
   else
     {
       
@@ -63,5 +65,16 @@ int CAENdrsTriggerHandler::wait_for_trigger( const int moreinfo)
       return _etype;
     }
   
-  return 0;
+   return 0;
+}
+
+int CAENdrsTriggerHandler::fill_data(int * adr, const int size)
+{
+  if ( _current_size >= 4*size)
+    {
+      cout << __LINE__ << "  " << __FILE__ << "data size too large  " << _current_size << " max is " <<  4*size  << endl;
+      return 0;
+    }
+  memcpy ( adr, _buffer, _current_size);
+  return _current_size;
 }

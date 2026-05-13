@@ -54,6 +54,8 @@ public:
   int _linknumber;
   int _nodenumber;
   int _endpulse;
+
+  int _is_usb;
   
   CAEN_DGTZ_DRS4Frequency_t _speed;
 

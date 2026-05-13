@@ -35,6 +35,8 @@ daq_device_CAENDigitizer::daq_device_CAENDigitizer(const int eventtype
   int node = 0;
 
   _warning = 0;
+  
+  _is_usb = 0;  // override in specific classes
 
 
 }
@@ -58,6 +60,9 @@ int  daq_device_CAENDigitizer::init()
 int daq_device_CAENDigitizer::put_data(const int etype, int * adr, const int length )
 {
 
+  //cout << __LINE__ << "  " << __FILE__ << " entering put_data with e_type " << etype << " usb: " << _is_usb << endl;
+
+  
   if ( _broken ) 
     {
       //      cout << __LINE__ << "  " << __FILE__ << " broken ";
@@ -92,18 +97,30 @@ int daq_device_CAENDigitizer::put_data(const int etype, int * adr, const int len
 
   uint32_t buffersize = 0;
 
-  while ( buffersize == 0) 
-    {
-      // Read data from the board 
-      _broken = CAEN_DGTZ_ReadData(handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, (char *) &sevt->data, &buffersize);
-      if ( _broken )
-	{
-	  cout << __FILE__ << " " << __LINE__ << " _broken = " << _broken<< endl;
-	  return 1;
-	}
-      //      cout << __FILE__ << " " << __LINE__ << " buffersize = " << buffersize << endl;
-    }
 
+  if (_th && _is_usb )  // we are the trigger, AND on USB
+    {
+
+      //cout << __FILE__ << " " << __LINE__ << " requesting data" << endl;
+      buffersize = _th->fill_data( &sevt->data, length);
+      //cout << __FILE__ << " " << __LINE__ << " buffersize received = " << buffersize << endl;
+    }
+  else  // we are not the trigger
+    {
+      
+      while ( buffersize == 0) 
+	{
+	  // Read data from the board 
+	  _broken = CAEN_DGTZ_ReadData(handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, (char *) &sevt->data, &buffersize);
+	  if ( _broken )
+	    {
+	      cout << __FILE__ << " " << __LINE__ << " _broken = " << _broken<< endl;
+	      return 1;
+	    }
+	  //      cout << __FILE__ << " " << __LINE__ << " buffersize = " << buffersize << endl;
+	}
+    }
+  
   len = buffersize /4;
   
   sevt->sub_padding = len%2;

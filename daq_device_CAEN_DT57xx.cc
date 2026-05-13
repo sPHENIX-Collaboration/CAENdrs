@@ -31,7 +31,9 @@ daq_device_CAEN_DT57xx::daq_device_CAEN_DT57xx(const int eventtype
        << nodenumber << " " 
        << trigger << endl;
 
-    if (CONET_Flag)
+  _is_usb = 1;
+  
+  if (CONET_Flag)
     {
       _is_conet = 1;
       cout << "*************** opening Digitizer for conet with link number " << _linknumber << endl;
@@ -65,12 +67,14 @@ daq_device_CAEN_DT57xx::daq_device_CAEN_DT57xx(const int eventtype
       if ( _is_conet)
 	{
 	  cout << __LINE__ << "  " << __FILE__ << " registering triggerhandler " << endl;
-	  _th  = new CAENdrsTriggerHandler (handle, m_eventType, 2);
+	  _th  = new CAENdrsTriggerHandler (handle, m_eventType, max_length(m_eventType),2);
+	  //_th  = new CAENdrsTriggerHandler (handle, m_eventType, 2);
 	}
       else
 	{
 	  cout << __LINE__ << "  " << __FILE__ << " registering triggerhandler " << endl;
-	  _th  = new CAENdrsTriggerHandler (handle, m_eventType, 1);
+	  _th  = new CAENdrsTriggerHandler (handle, m_eventType, max_length(m_eventType),1);
+	  //_th  = new CAENdrsTriggerHandler (handle, m_eventType, 1);
 	}
       registerTriggerHandler ( _th);
     }

@@ -18,6 +18,7 @@ librcdaqplugin_CAENdrs_la_SOURCES = \
 	daq_device_CAEN_DT57xx.cc \
 	daq_device_CAENPulse.cc \
 	daq_device_CAENcalibration.cc \
+	CAENdrs_handles.cc \
 	CAENdrsTriggerHandler.cc \
 	CAENdrs_plugin.cc
 

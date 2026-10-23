@@ -6,6 +6,7 @@
 
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
+#include <CAENdrs_handles.h>
 
 using namespace std;
 
@@ -65,13 +66,20 @@ int daq_device_CAENcalibration::put_data(const int etype, int * adr, const int l
       return 0;
     }
 
+  // if a readout device has this digitizer open, we use its handle and
+  // must not close it. Only when we are alone we open our own.
   int handle;
-  _last_status = open_digitizer(handle);
-  if ( _last_status )
+  int own_handle = 0;
+  if ( ! caen_find_handle(_connection, _linknumber, _nodenumber, handle) )
     {
-      cout << __FILE__ << " " << __LINE__ << " Error " << _last_status
-	   << " opening the digitizer at link " << _linknumber << " node " << _nodenumber << endl;
-      return 0;
+      _last_status = open_digitizer(handle);
+      if ( _last_status )
+	{
+	  cout << __FILE__ << " " << __LINE__ << " Error " << _last_status
+	       << " opening the digitizer at link " << _linknumber << " node " << _nodenumber << endl;
+	  return 0;
+	}
+      own_handle = 1;
     }
 
   CAEN_DGTZ_BoardInfo_t BoardInfo;
@@ -79,7 +87,7 @@ int daq_device_CAENcalibration::put_data(const int etype, int * adr, const int l
   if ( _last_status )
     {
       cout << __FILE__ << " " << __LINE__ << " Error " << _last_status << " in CAEN_DGTZ_GetInfo" << endl;
-      CAEN_DGTZ_CloseDigitizer(handle);
+      if ( own_handle) CAEN_DGTZ_CloseDigitizer(handle);
       return 0;
     }
   _serial = BoardInfo.SerialNumber;
@@ -142,7 +150,7 @@ int daq_device_CAENcalibration::put_data(const int etype, int * adr, const int l
 	}
     }
 
-  CAEN_DGTZ_CloseDigitizer(handle);
+  if ( own_handle) CAEN_DGTZ_CloseDigitizer(handle);
 
   int len = d - &sevt->data;
   sevt->sub_padding = len%2;

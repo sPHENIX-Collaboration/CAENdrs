@@ -6,6 +6,7 @@
 #include <daq_device_CAENdrs_std.h>
 #include <daq_device_CAEN_DT57xx.h>
 #include <daq_device_CAENPulse.h>
+#include <daq_device_CAENcalibration.h>
 
 #include <strings.h>
 
@@ -341,6 +342,32 @@ int CAENdrs_plugin::create_device(deviceblock *db)
 	}
     }  
   
+  else if ( strcasecmp(db->argv0,"device_CAENcalibration") == 0 ) 
+    {
+      // we need at least 3 params
+      if ( db->npar <3 || db->npar > 7 ) return 1; // indicate wrong params
+      
+      eventtype  = get_value ( db->argv1); // event type
+      subid = get_value ( db->argv2); // subevent id
+
+      int linknumber = 0;
+      int nodenumber = 0;
+      int connection = 0;
+      int readout_subid = 0;
+      if ( db->npar > 3) linknumber    = get_value ( db->argv3);
+      if ( db->npar > 4) nodenumber    = get_value ( db->argv4);
+      if ( db->npar > 5) connection    = get_value ( db->argv5);
+      if ( db->npar > 6) readout_subid = get_value ( db->argv6);
+
+      add_readoutdevice ( new daq_device_CAENcalibration( eventtype,
+							  subid,
+							  linknumber,
+							  nodenumber,
+							  connection,
+							  readout_subid));
+      return 0;  // say "we handled this request" 
+    }  
+  
   return -1; // say " this is not our device"
 }
 
@@ -358,6 +385,7 @@ void CAENdrs_plugin::identify(std::ostream& os, const int flag) const
       os << " -     device_CAENdrs_std (evttype, subid, link_nr, node_nr, trigger, speed, delay[%], endpulse) - CAEN V1742 standard config" << std::endl;
       os << " -     device_CAEN_DT57xx (evttype, subid, conet, link_nr, node_nr, trigger, speed, delay[%], endpulse) - CAEN DT57xx desktop model via USB" << std::endl;
       os << " -     device_CAENPulse (evttype, subid, link_nr, node_nr ) - CAEN V1742 pulse generator" << std::endl;
+      os << " -     device_CAENcalibration (evttype, subid, link_nr, node_nr, connection, readout_subid) - capture the V1742 calibration data, connection 0=optical 1=USB 2=A4818" << std::endl;
     }
       
 

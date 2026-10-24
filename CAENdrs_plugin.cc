@@ -177,7 +177,7 @@ int CAENdrs_plugin::create_device(deviceblock *db)
 	  return 0;  // say "we handled this request" 
 	}
 
-      else if ( db->npar == 7)
+      else if ( db->npar == 8)
 	{
 	  int conetflag = get_value ( db->argv3);
 	  int linknumber = get_value ( db->argv4);
@@ -241,7 +241,7 @@ int CAENdrs_plugin::create_device(deviceblock *db)
 	{
 	  int linknumber = get_value ( db->argv3);
 	  int nodenumber = get_value ( db->argv4);
-	  int trigger = get_value ( db->argv4);
+	  int trigger = get_value ( db->argv5);
 
 	  add_readoutdevice ( new daq_device_CAENdrs_std( eventtype,
 							  subid,
@@ -254,8 +254,8 @@ int CAENdrs_plugin::create_device(deviceblock *db)
 	{
 	  int linknumber = get_value ( db->argv3);
 	  int nodenumber = get_value ( db->argv4);
-	  int trigger = get_value ( db->argv4);
-	  int speed = get_value ( db->argv5);
+	  int trigger = get_value ( db->argv5);
+	  int speed = get_value ( db->argv6);
 
 	  add_readoutdevice ( new daq_device_CAENdrs_std( eventtype,
 							  subid,
@@ -269,9 +269,9 @@ int CAENdrs_plugin::create_device(deviceblock *db)
 	{
 	  int linknumber = get_value ( db->argv3);
 	  int nodenumber = get_value ( db->argv4);
-	  int trigger = get_value ( db->argv4);
-	  int speed = get_value ( db->argv5);
-	  int delay   = get_value ( db->argv6);
+	  int trigger = get_value ( db->argv5);
+	  int speed = get_value ( db->argv6);
+	  int delay   = get_value ( db->argv7);
 
 	  add_readoutdevice ( new daq_device_CAENdrs_std( eventtype,
 							  subid,
@@ -287,10 +287,10 @@ int CAENdrs_plugin::create_device(deviceblock *db)
 	{
 	  int linknumber = get_value ( db->argv3);
 	  int nodenumber = get_value ( db->argv4);
-	  int trigger = get_value ( db->argv4);
-	  int speed = get_value ( db->argv5);
-	  int delay   = get_value ( db->argv6);
-	  int endpulse   = get_value ( db->argv7);
+	  int trigger = get_value ( db->argv5);
+	  int speed = get_value ( db->argv6);
+	  int delay   = get_value ( db->argv7);
+	  int endpulse   = get_value ( db->argv8);
 
 	  add_readoutdevice ( new daq_device_CAENdrs_std( eventtype,
 							  subid,
@@ -383,7 +383,7 @@ void CAENdrs_plugin::identify(std::ostream& os, const int flag) const
       os << " - CAEN DRS Plugin, provides - " << std::endl;
       os << " -     device_CAENdrs (evttype, subid, link_nr, node_nr, trigger, endpulse) - CAEN V1742 custom config" << std::endl;
       os << " -     device_CAENdrs_std (evttype, subid, link_nr, node_nr, trigger, speed, delay[%], endpulse) - CAEN V1742 standard config" << std::endl;
-      os << " -     device_CAEN_DT57xx (evttype, subid, conet, link_nr, node_nr, trigger, speed, delay[%], endpulse) - CAEN DT57xx desktop model via USB" << std::endl;
+      os << " -     device_CAEN_DT57xx (evttype, subid, conet, link_nr, node_nr, trigger, endpulse) - CAEN DT57xx desktop model via USB" << std::endl;
       os << " -     device_CAENPulse (evttype, subid, link_nr, node_nr ) - CAEN V1742 pulse generator" << std::endl;
       os << " -     device_CAENcalibration (evttype, subid, link_nr, node_nr, connection, readout_subid) - capture the V1742 calibration data, connection 0=optical 1=USB 2=A4818" << std::endl;
     }

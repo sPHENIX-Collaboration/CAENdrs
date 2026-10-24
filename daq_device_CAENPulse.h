@@ -32,7 +32,10 @@ public:
 
  protected:
 
+  int get_handle();
+
   int handle;
+  int _own_handle;   // 1 if we opened the digitizer ourselves (no readout device has it open)
 
   int _linknumber;
 

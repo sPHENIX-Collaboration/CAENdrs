@@ -3,6 +3,7 @@
 
 #include <daq_device_CAENDigitizer.h>
 #include <string.h>
+#include <chrono>
 
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
@@ -35,6 +36,7 @@ daq_device_CAENDigitizer::daq_device_CAENDigitizer(const int eventtype
   int node = 0;
 
   _warning = 0;
+  _read_timeouts = 0;
   
   _is_usb = 0;  // override in specific classes
 
@@ -108,6 +110,12 @@ int daq_device_CAENDigitizer::put_data(const int etype, int * adr, const int len
   else  // we are not the trigger
     {
       
+      // we were triggered, so the data should be there right away. If the
+      // board has nothing after ReadTimeout, it never got that trigger (e.g.
+      // a setup error); we give up on this event rather than hang forever,
+      // which would also make daq_end hang.
+      const auto ReadTimeout = std::chrono::seconds(1);
+      const auto t0 = std::chrono::steady_clock::now();
       while ( buffersize == 0) 
 	{
 	  // Read data from the board 
@@ -118,6 +126,17 @@ int daq_device_CAENDigitizer::put_data(const int etype, int * adr, const int len
 	      return 1;
 	    }
 	  //      cout << __FILE__ << " " << __LINE__ << " buffersize = " << buffersize << endl;
+	  if ( buffersize == 0 && std::chrono::steady_clock::now() - t0 > ReadTimeout)
+	    {
+	      // don't flood the log if this happens on every event
+	      if ( _read_timeouts++ % 1000 == 0)
+		{
+		  cout << __FILE__ << " " << __LINE__ << " packet " << m_subeventid
+		       << ": no data from the digitizer, event skipped ("
+		       << _read_timeouts << " times so far)" << endl;
+		}
+	      return 0;
+	    }
 	}
     }
   

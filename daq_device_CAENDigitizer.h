@@ -44,6 +44,7 @@ public:
 
   int _broken;
   int _warning;
+  unsigned int _read_timeouts;  // events skipped because the board had no data
 
   subevtdata_ptr sevt;
 

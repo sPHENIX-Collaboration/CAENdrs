@@ -6,6 +6,7 @@
 
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
+#include <CAENdrs_handles.h>
 
 #define VME_INTERRUPT_LEVEL      1
 #define VME_INTERRUPT_STATUS_ID  0xAAAA
@@ -25,29 +26,39 @@ daq_device_CAENPulse::daq_device_CAENPulse(const int eventtype
   _linknumber = linknumber;
 
   handle = 0;
+  _own_handle = 0;
 
   _warning = 0;
+  _broken = 0;
 
-  int node = 0;
+  // we don't open the digitizer here. A second open of a digitizer that a
+  // readout device has open conflicts with it, so we look for that device's
+  // handle when we need it, see get_handle().
+}
 
-  cout << __FILE__ << " " <<  __LINE__ << " Pulse on " << m_eventType << " " << _linknumber << endl;
-  
+int daq_device_CAENPulse::get_handle()
+{
+  if ( _own_handle) return 0;
+
+  const int node = 0;
+  if ( caen_find_handle(0, _linknumber, node, handle) ) return 0;
+
+  // no readout device has it open, so we open it ourselves, and keep it
   _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , node, 0 ,&handle);
-
-
   if ( _broken )
     {
       cout << " Error in CAEN_DGTZ_OpenDigitizer " << _broken << endl;
-      return;
+      return _broken;
     }
-
+  _own_handle = 1;
+  return 0;
 }
 
 daq_device_CAENPulse::~daq_device_CAENPulse()
 {
 
 
-  CAEN_DGTZ_CloseDigitizer(handle);
+  if ( _own_handle) CAEN_DGTZ_CloseDigitizer(handle);
 
 }
 
@@ -70,6 +81,8 @@ int daq_device_CAENPulse::put_data(const int etype, int * adr, const int length 
       return 0;
     }
 
+  if ( get_handle() ) return 0;
+
   const unsigned int reg    = 0x811C;
   const unsigned int pulseon  = 0xC000;
   const unsigned int pulseoff = 0x8000;
@@ -83,27 +96,14 @@ int daq_device_CAENPulse::put_data(const int etype, int * adr, const int length 
 
 void daq_device_CAENPulse::identify(std::ostream& os) const
 {
-
-  CAEN_DGTZ_BoardInfo_t       BoardInfo;
-
-
   if ( _broken) 
     {
       os << "CAEN Pulse at Event Type: " << m_eventType 
-	 << " ** not functional ** " << endl;
+	 << " link " << _linknumber << " ** not functional ** " << endl;
     }
   else
     {
-      
-      int ret = CAEN_DGTZ_GetInfo(handle, &BoardInfo);
-      if ( ret )
-	{
-	  cout << " Error in CAEN_DGTZ_GetInfo" << endl;
-	  return;
-	}
-      
-      os << "CAEN Digitizer Pulse at Event Type: " << m_eventType << endl;
-
+      os << "CAEN Digitizer Pulse at Event Type: " << m_eventType 
+	 << " link " << _linknumber << endl;
     }
 }
-

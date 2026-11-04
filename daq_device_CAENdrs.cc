@@ -6,6 +6,7 @@
 
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
+#include <CAENdrs_handles.h>
 
 #define VME_INTERRUPT_LEVEL      1
 #define VME_INTERRUPT_STATUS_ID  0xAAAA
@@ -25,6 +26,7 @@ daq_device_CAENdrs::daq_device_CAENdrs(const int eventtype
 
   cout << "*************** opening Digitizer" << endl;
   _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_OpticalLink, _linknumber , _nodenumber, 0 ,&handle);
+  if ( ! _broken) caen_register_handle(0, _linknumber, _nodenumber, handle);
   //  _broken = CAEN_DGTZ_OpenDigitizer( CAEN_DGTZ_USB, _linknumber , _nodenumber, 0 ,&handle);
   cout << "*************** " << _broken  << endl;
 
@@ -68,6 +70,7 @@ daq_device_CAENdrs::~daq_device_CAENdrs()
     {
       CAEN_DGTZ_FreeEvent(handle, (void**)&_Event742);
     }
+  caen_unregister_handle(handle);
   CAEN_DGTZ_CloseDigitizer(handle);
 
 }
